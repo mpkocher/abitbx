@@ -33,7 +33,7 @@ class Crystal(object):
     Core object of this package.
     """
     
-    def __init__(self, space_group = None, lattice = Lattice(1.0, 1.0, 1.0, 90.0, 90.0, 90.0), sites=[]):
+    def __init__(self, space_group = SpaceGroup('P 1'), lattice = Lattice(1.0, 1.0, 1.0, 90.0, 90.0, 90.0), sites=[]):
         """
         Crystal object.
         Functions as a wrapper to a cctbx xray.structure object,
@@ -50,8 +50,11 @@ class Crystal(object):
             or creation of the crystal will fail.
         """
         
-        #assume that space_group, sites, lattice are given
-        crystal_symmetry = crystal.symmetry(unit_cell=str(lattice), space_group_symbol=space_group.cctbx_name)
+        try:
+            crystal_symmetry = crystal.symmetry(unit_cell=str(lattice), space_group_symbol=space_group.cctbx_name)
+        except Exception as e:
+            raise SymmetryError("SpaceGroup {s} is incompatible with Lattice -> {l} cctbx error {e}".format(l=str(lattice), s=SpaceGroup.cctbx_name, e=e))
+
         scatterers = flex.xray_scatterer()
         for i, site in enumerate(sites):
             # the element name can be pulled from scatterer via the s.element_symbol() method (if it's an element!!!)
@@ -76,6 +79,7 @@ class Crystal(object):
             # print "occupancy = ", site.occupancy
             scatterers.append(xray.scatterer(label=k, site=tuple(site.abc), occupancy=site.occupancy))
         
+        # Test for coherency of Lattice and SpaceGroup
         self.crystal_structure = xray.structure(crystal_symmetry=crystal_symmetry, scatterers=scatterers)
 
     @staticmethod
@@ -167,13 +171,15 @@ class Crystal(object):
         self.crystal_structure.add_scatterer( s.to_scatterer())
     
     def add_sites(self, new_sites):
-        """docstring for add_sites"""
         for s in new_sites:
             self.add_site(s)
     
     def remove_site_at(self,abc):
-        """ NOT IMPLEMENTED. """
-        raise NotImplementedError("")
+        raise NotImplementedError("Crystal#remove_site_at")
+        
+    def remove_site_at_index(self,i):
+        raise NotImplementedError("Crystal#remove_site_at_index")
+    pass
     
     
     # verbose java-y way to make it clear that it's Immutable
@@ -229,10 +235,28 @@ class Crystal(object):
         #FIXME
         return "Summary"
 
-    def get_coord_number(self, scatterer):
+    def get_coordination_number(self, scatterer):
         #FIXME
         return 4.0
 
-    def assign_wyckoff(self, abc):
-        #FIXME
-        return 'a'
+    def assign_wyckoff(self, abc, tol=0.1):
+        #FIXME This needs improvement and to be tested
+        cctbx_name = self.space_group.cctbx_name
+        sg_symbol = sgtbx.space_group_symbols(cctbx_name)
+        sg = sgtbx.space_group(sg_symbol)
+        unit_cell = uctbx.unit_cell(str(self.get_lattice()))
+        symmetry = crystal.symmetry(unit_cell=unit_cell, space_group=sg)
+        special_position_settings = crystal.special_position_settings(symmetry,min_distance_sym_equiv=0.5)
+        site_symmetry = special_position_settings.site_symmetry(abc)
+        wyckoff_table = special_position_settings.space_group_info().wyckoff_table()
+        wyckoff_mapping = wyckoff_table.mapping(site_symmetry)
+        letter = wyckoff_mapping.position().letter()
+        return letter
+
+
+class SymmetryError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return "Symmetry Error -> " + self.msg

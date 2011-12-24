@@ -1,11 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import os
 import re
+import json
 from cctbx import sgtbx
+
+def _load_icsd_to_cctbx():
+    _name = 'icsd_name_to_cctbx_name.json'
+    file_name = os.path.join(os.path.dirname(os.path.abspath(__file__)), _name)
+    with open(file_name, 'r') as f:
+        d = json.loads(f.read())
+    return d
+
 
 class SpaceGroup(object):
 
-    """docstring for SpaceGroup"""
+    # this is really stupid to do
+    ICSD_TO_CCTBX = _load_icsd_to_cctbx()
 
     def __init__(self, name):
 
@@ -29,6 +40,26 @@ class SpaceGroup(object):
             return True
         else:
             return False
+
+    
+    @staticmethod
+    def from_icsd_name(icsd_name):
+        if icsd_name in SpaceGroup.ICSD_TO_CCTBX:
+            return SpaceGroup.ICSD_TO_CCTBX[icsd_name]
+        else:
+            return None
+
+    @property
+    def icsd_name(self):
+        #FIXME This is a bit flakey and slow as mudz
+        r = None
+        for k,v in SpaceGroup.ICSD_TO_CCTBX.items():
+            if v.encode('utf8') == self.cctbx_name:
+                r = k
+        if r is None:
+            return None
+        else:
+            return r[0]
 
     @property
     def cctbx_name(self):
@@ -141,3 +172,9 @@ class SpaceGroup(object):
         return outs
 
 
+class SpaceGroupSymbolError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return "SpaceGroup Error -> Unable to interpet " + self.msg

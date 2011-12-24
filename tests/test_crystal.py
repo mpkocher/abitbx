@@ -1,6 +1,6 @@
 import glob
 import unittest
-from abitbx.crystal import Crystal
+from abitbx.crystal import Crystal, SymmetryError
 from abitbx.space_group import SpaceGroup
 from abitbx.site import Site
 from abitbx.lattice import Lattice
@@ -68,7 +68,7 @@ class TestCrystal(unittest.TestCase):
             print c.to_standard().to_niggli().to_dict()
     
     
-    def test_assign_coord_num(self):
+    def test_assign_coordination_number(self):
         
         print "Test assign coordination number."
         
@@ -81,7 +81,7 @@ class TestCrystal(unittest.TestCase):
             
             label = sca.label
             
-            coord_num = current_crystal.get_coord_number(sca)
+            coord_num = current_crystal.get_coordination_number(sca)
             self.assertEqual(coord_num, 4.0)
             '''
             # make sure labels match cctbx output
@@ -121,7 +121,19 @@ class TestCrystal(unittest.TestCase):
                 passed = False 
                       
             '''
+    def test_assign_wyckoff(self):
+        """docstring for test_assign_wyckoff"""
+        abc = [0.25, 0.25, 0.5]
+        letter = self.crystal.assign_wyckoff(abc)
+        self.assertEqual(letter, 'f')
 
+    def test_symmetry_error(self):
+        space_group = SpaceGroup('F d d 2')
+        lattice = Lattice(4.0, 5.0, 6.0, 88.0, 91.0, 95.0)
+        sites = []
+        sites.append(Site(label="Li", abc=(0.25, 0.0, 0.0), occupancy=0.80))
+        #crystal = Crystal(sites=sites, space_group=space_group, lattice=lattice)
+        pass
                     
 if __name__ == '__main__':
     unittest.main()

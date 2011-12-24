@@ -7,6 +7,7 @@ ToDo:
     - Implement load_from_dict
     - Add xyz (since it's immutable?)
 '''
+import periodictable
 
 class Site(object):
 
@@ -28,13 +29,21 @@ class Site(object):
 
         if label is None:
             self.label = name
-        
+
+        #FIXME
+        # is label/name coherent and valid
+
         #make things immmutable
-        self._a = abc[0]
-        self._b = abc[1]
-        self._c = abc[2]
+        self._a = Site._in_unit_cellizer(abc[0])
+        self._b = Site._in_unit_cellizer(abc[1])
+        self._c = Site._in_unit_cellizer(abc[2])
 
         self._occupancy = occupancy
+
+        # Sanity Checks
+        assert((self.name in [e.symbol for e in periodictable.elements]) == True)
+        assert(all([isinstance(i, (float, int)) for i in abc]) == True)
+        assert((self._occupancy <= 1.0) == True)
 
     @property
     def a(self):
@@ -49,9 +58,21 @@ class Site(object):
         return self._c
 
     @property
+    def abc(self):
+        """ Return a list of the lattice parameters. """
+        return [self.a, self.b, self.c]
+
+    @property
     def name(self):
+        #this should be taken out and replaced by 'label'
+        # 'label' is of the form 'Fe' or 'Fe-1'
+        # and symbol is the 'Fe'
         return self._name
     
+    @property
+    def symbol(self):
+        return self._name
+
     @property
     def occupancy(self):
         return self._occupancy
@@ -61,11 +82,6 @@ class Site(object):
         """not implemented"""
         raise NotImplementedError()
         
-    @property
-    def abc(self):
-        """ Return a list of the lattice parameters. """
-        return [self.a, self.b, self.c]
-
     def summary(self):
         """ Return a string summary of the site. """
         outs = []
@@ -73,8 +89,16 @@ class Site(object):
         return outs
 
     def print_summary(self):
-        """ Print a string summary of the site. """
         print "\n".join(self.summary())
+
+    @staticmethod
+    def _in_unit_cellizer(n):
+        if n >= 1.0:
+            return Site._in_unit_cellizer(n - 1)
+        elif n < 0.0:
+            return Site._in_unit_cellizer(n + 1)
+        else:
+            return n
 
     def to_dict(self):
         """ Generate return a dictionary of the site. """
