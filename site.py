@@ -7,7 +7,7 @@ ToDo:
     - Implement load_from_dict
     - Add xyz (since it's immutable?)
 '''
-import periodictable
+#import periodictable
 
 class Site(object):
 
@@ -41,7 +41,7 @@ class Site(object):
         self._occupancy = occupancy
 
         # Sanity Checks
-        assert((self.name in [e.symbol for e in periodictable.elements]) == True)
+        #assert((self.name in [e.symbol for e in periodictable.elements]) == True)
         assert(all([isinstance(i, (float, int)) for i in abc]) == True)
         assert((self._occupancy <= 1.0) == True)
 

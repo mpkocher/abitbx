@@ -12,7 +12,6 @@ def task_doc_to_crystal(doc):
     '''
     pass
 
-
 # Coherent with the Schema MP 1.0
 def _space_group_to_doc(space_group):
     """

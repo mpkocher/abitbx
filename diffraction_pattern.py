@@ -1,8 +1,7 @@
 class DiffractionPattern(object):
     version = dict(major=0, minor=1, tiny=0)
-    """docstring for DiffractionPattern"""
     def __init__(self, crystal, wavelength='Cu'):
-        super(DiffractionPattern, self).__init__()
+        # xray crystal structure
         self._crystal = crystal
         self._wavelength = wavelength
         self._pattern = {}
@@ -13,7 +12,7 @@ class DiffractionPattern(object):
         """docstring for wavelength"""
         return self._wavelength
         
-    def calculate(self):
-        """docstring for calculate"""
+    def calculate(self, wavelength=None):
+        # returns a dict of crystal structure
         pass
         

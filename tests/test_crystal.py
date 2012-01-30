@@ -1,3 +1,4 @@
+import os
 import glob
 import unittest
 from abitbx.crystal import Crystal, SymmetryError
@@ -5,8 +6,11 @@ from abitbx.space_group import SpaceGroup
 from abitbx.site import Site
 from abitbx.lattice import Lattice
 
+TEST_FILES = 'data'
+
 class TestCrystal(unittest.TestCase):
     def setUp(self):
+        self.cif_file_names = [os.path.abspath(file_name) for file_name in glob.glob(os.path.join(TEST_FILES, 'cifs/*.cif'))]
         space_group = SpaceGroup('C 1 2/m 1')
         lattice = Lattice(4.0, 5.0, 6.0, 90.0, 109.10, 90.0)
         sites = []
@@ -16,33 +20,26 @@ class TestCrystal(unittest.TestCase):
         self.crystal = Crystal(sites=sites, space_group=space_group, lattice=lattice)
     
     def test_load_cif(self):
-        for file_name in glob.glob('test_cifs/*.cif'):
-            #file_name = 'test_cifs/icsd-12301.cif'
+        for file_name in self.cif_file_names:
             c = Crystal.from_cif(file_name)
             c.print_summary
 
     def test_crystal(self):
-        """docstring for test_crystal"""
-        for file_name in glob.glob('test_cifs/*.cif'):
-            #file_name = 'test_cifs/icsd-12301.cif'
+        for file_name in self.cif_file_names:
             c = Crystal.from_cif(file_name)
             c.print_summary()
             for site in c.sites:
                 print site.to_dict()
 
     def test_to_niggli(self):
-        """docstring for test_to_niggli"""
-        for file_name in glob.glob('test_cifs/*.cif'):
-            #file_name = 'test_cifs/icsd-12301.cif'
+        for file_name in self.cif_file_names:
             c = Crystal.from_cif(file_name)
             n = c.to_niggli()
             n.print_summary()
             print n.to_dict()
     
     def test_to_standard(self):
-        """docstring for test_to_niggli"""
-        for file_name in glob.glob('test_cifs/*.cif'):
-            #file_name = 'test_cifs/icsd-12301.cif'
+        for file_name in self.cif_file_names:
             c = Crystal.from_cif(file_name)
             n = c.to_standard()
             n.print_summary()
@@ -50,8 +47,7 @@ class TestCrystal(unittest.TestCase):
     
     def test_multiple_transforms(self):
         """docstring for test_to_niggli"""
-        for file_name in glob.glob('test_cifs/*.cif'):
-            #file_name = 'test_cifs/icsd-12301.cif'
+        for file_name in self.cif_file_names:
             c = Crystal.from_cif(file_name)
             n = c.to_standard()
             ssg = n.space_group.raw_cctbx_name
@@ -72,7 +68,7 @@ class TestCrystal(unittest.TestCase):
         
         print "Test assign coordination number."
         
-        file_name = 'test_cifs/icsd-12301.cif'
+        file_name = os.path.join(TEST_FILES, 'cifs', 'icsd-12301.cif')
         current_crystal = Crystal.from_cif(file_name)
         
         passed = True
