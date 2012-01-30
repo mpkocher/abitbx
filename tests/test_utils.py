@@ -32,6 +32,9 @@ class TestUtils(unittest.TestCase):
             #print (sg, s)
             
     def test_mg_structure_from_cif(self):
+        """
+        Functional test to see if the parsing from a cif works
+        """
         crystals = []
         for file_name in self.cif_file_names:
             crystal = utils.cctbx_crystal_structure_from_cif(file_name)

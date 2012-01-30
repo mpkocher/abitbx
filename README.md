@@ -64,14 +64,22 @@ You can either install the cctbx bundle with it's own version of python, or comp
 
 A few examples should go here
 
-#### Using the Library ####
-- What is an xdict?
-- What is an sdict?
-
 #### Using the commandline tools ####
-- cif2converter.py
-- cif2xrd.py
-- analyze_cif.py
+
+abitbx/bin/analyzer.py
+
+	$> echo "Print info/summary"
+	$> python analyzer.py LiCoO2.cif
+	$> echo "Print SpaceGroup"
+	$> python analyzer.py LiCoO2.cif --space_group
+	$> echo "Print XRD"
+	$> python analyzer.py LiCoO2.cif --xrd
+	$> echo "Write XRD to json"
+	$> python analyzer.py LiCoO2.cif --xrd --out xrd.json
+
+The crystal structure can also be specified by MaterialsProject json (`Structure.to_dict()`) format
+
+	$> python analyzer LiCoO2.json --space_group
 
 
 ### F.A.Q. ###

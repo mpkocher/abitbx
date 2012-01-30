@@ -53,13 +53,25 @@ def find_symmetry(dict_or_xtl):
         c = dict_or_xtl
     return find_symmetry_from_crystal_structure(c)
 
-def cctbx_crystal_structure_to_mg_structure_dict(xtl):
+def cctbx_crystal_structure_to_mg_structure_dict(crystal_structure):
     """
     Args: xtl (cctbx xray.crystal_structure)
 
     Returns: dict consistent with the MaterialsProject Structure.to_dict format
     """
     d = {}
+    p = self.crystal_structure.unit_cell().parameters()
+    lattice = dict(a=p[0], b=p[1], c=p[2], alpha=p[3], beta=p[4], gamma=p[5])
+    sites = []
+    for i, s in enumerate(crystal_structure.scatterers()):
+            name = s.label.split("-")[0]
+            abc = s.site
+            occupancy = s.occupancy
+            # {'element': spec.symbol, 'occu': occu, 'oxidation_state': spec.oxi_state}
+            # {'label': self.species_string, 'species': species_list, 'occu': occu, 'xyz':list(self._coords), 'abc':list(self._fcoords)}
+            specie = {'element': name, 'occu': occupancy}
+            site = {'label': label, 'species': [specie], 'occu':occupancy, 'xyz': [None, None, None], 'abc':abc}
+            sites.append(site)
     return d
     
 def cctbx_crystal_structure_from_cif(file_name, name=None):
